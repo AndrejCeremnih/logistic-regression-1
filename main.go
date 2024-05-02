@@ -7,6 +7,7 @@ import (
 	"image/color"
 	"log"
 	"math"
+	"math/rand"
 	"os"
 	"strconv"
 
@@ -56,8 +57,24 @@ func dCost(inputs [][]float64, y, p []float64) (dw []float64, db float64) {
 }
 
 func split(inputs [][]float64, y []float64) (xTrain, xTest [][]float64, yTrain, yTest []float64) {
-	xTrain, xTest = inputs[:len(inputs)*8/10], inputs[len(inputs)*8/10:]
-	yTrain, yTest = y[:len(y)*8/10], y[len(y)*8/10:]
+	trainIndices := make(map[int]bool)
+	rnd := rand.New(rand.NewSource(10))
+	for i := 0; i < len(inputs)/5*4; i++ {
+		idx := rnd.Intn(len(inputs))
+		for trainIndices[idx] {
+			idx = rnd.Intn(len(inputs))
+		}
+		trainIndices[idx] = true
+	}
+	for i := 0; i < len(inputs); i++ {
+		if trainIndices[i] {
+			xTrain = append(xTrain, inputs[i])
+			yTrain = append(yTrain, y[i])
+		} else {
+			xTest = append(xTest, inputs[i])
+			yTest = append(yTest, y[i])
+		}
+	}
 	return
 }
 
